@@ -4,18 +4,23 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: set up node js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v4
         with: 
             node-version: '18'
-        
-      - name: install dep
-        run: npm install
-        
-      - name: run test
-        run: npm test
+      - run: npm install
+      - run: npm test
+  deploy:
+     needs: test
+     runs-on: ubuntu-latest
+     steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Render
+        env:  
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+
+        run: |
+          curl -X POST "https://api.render.com/deploy/srv-d3hpiib3fgac73a0bo70" \
+          -H "Accept: application/json" \
+          -H "Authorization: Bearer $RENDER_API_KEY"
